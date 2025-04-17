@@ -21,19 +21,26 @@ export class AuthService {
   async login(dto: LoginUserDto) {
     const user = await this.userService.findByEmail(dto.email);
   
-    if (!user || !(await user.validatePassword(dto.password))) {
-      throw new UnauthorizedException("Invalid credentials");
+    if (!user) {
+      throw new UnauthorizedException('Email not registered');
     }
   
-    const tokens = await this.getTokens( user.id, user.email);
+    if (user.provider !== 'local') {
+      throw new UnauthorizedException(`Please log in with ${user.provider}`);
+    }
   
+    const isPasswordValid = await user.validatePassword(dto.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+  
+    const tokens = await this.getTokens(user.id, user.email);
     user.refreshToken = tokens.refreshToken;
     await user.save();
   
     return { user, ...tokens };
-  }
+  }  
   
-
   async validateOAuthLogin(profile: any) {
     let user = await this.userService.findByOAuth(profile.provider, profile.providerId)
 
@@ -42,6 +49,8 @@ export class AuthService {
     }
 
     const tokens = await this.getTokens(user.id, user.email)
+    user.refreshToken = tokens.refreshToken
+    user.save()
     return { user, ...tokens }
   }
 
