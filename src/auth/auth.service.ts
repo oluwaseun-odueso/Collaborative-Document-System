@@ -1,0 +1,81 @@
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../users/users.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
+import { User } from 'src/users/user.model';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async register(dto: CreateUserDto) {
+    const user = await this.userService.create(dto);
+    const tokens = await this.getTokens(user.id, user.email)
+    return { user, ...tokens }
+  }
+
+  async login(dto: LoginUserDto) {
+    const user = await this.userService.findByEmail(dto.email);
+  
+    if (!user || !(await user.validatePassword(dto.password))) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+  
+    const tokens = await this.getTokens( user.id, user.email);
+  
+    user.refreshToken = tokens.refreshToken;
+    await user.save();
+  
+    return { user, ...tokens };
+  }
+  
+
+  async validateOAuthLogin(profile: any) {
+    let user = await this.userService.findByOAuth(profile.provider, profile.providerId)
+
+    if (!user) {
+      user = await this.userService.createOAuthUser(profile)
+    }
+
+    const tokens = await this.getTokens(user.id, user.email)
+    return { user, ...tokens }
+  }
+
+  async getTokens(userId: string, email: string) {
+    const [ accessToken, refreshToken ] = await Promise.all([
+      this.jwtService.signAsync({ sub: userId, email }, { expiresIn: '15m' }),
+      this.jwtService.signAsync({ sub: userId }, { expiresIn: '7d' })
+    ])
+
+    return { accessToken, refreshToken }
+  }
+
+  async handleGitHubLogin(profile: any) {
+    let user = await this.userService.findByGitHubId(profile.id)
+    if (!user) {
+      user = await this.userService.createOAuthUser({
+        provider: 'github',
+        githubId: profile.id,
+        username: profile.username,
+        email: profile.emails?.[0]?.value,
+        name: profile.displayName,
+        avatar: profile.photos?.[0]?.value,
+      });
+    }
+    
+    return this.login(user)
+  }
+
+  async refresh(refreshToken: string) {
+    const payload = this.jwtService.verify(refreshToken)
+    const user = await this.userService.findById(payload.sub)
+
+    if (!user || user.refreshToken !== refreshToken) throw new ForbiddenException();
+
+    return this.login(user)
+  }
+}
