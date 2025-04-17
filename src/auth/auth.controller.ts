@@ -22,7 +22,7 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
-  @Get('google/redirect')
+  @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleRedirect(@Req() req) {
     return this.authService.validateOAuthLogin(req.user);
@@ -32,7 +32,7 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   async githubLogin() {}
 
-  @Get('github/redirect')
+  @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubRedirect(@Req() req) {
     return this.authService.validateOAuthLogin(req.user);
