@@ -40,7 +40,7 @@ export class AuthController {
   }
 
   @Post('set-password')
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   async setPassword(@Req() req, @Body() dto: SetPasswordDto) {
     return this.authService.setPassword(dto)
   }
