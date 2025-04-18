@@ -4,6 +4,8 @@ import { Document } from './models/document.model';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { DocumentHistory } from './models/document-history.model';
+import { CreationAttributes } from 'sequelize';
+import { createInstance } from "../common/helpers/sequelize.helpers"
 
 @Injectable()
 export class DocumentsService {
@@ -16,7 +18,7 @@ export class DocumentsService {
     createDto: CreateDocumentDto,
     ownerId: string,
   ): Promise<Document> {
-    return this.documentModel.create({ ...createDto, ownerId });
+    return this.documentModel.create(createDto as CreationAttributes<Document> & { ownerId: string });
   }
 
   async findAll(): Promise<Document[]> {
@@ -42,7 +44,7 @@ export class DocumentsService {
       documentId: doc.id,
       oldContent: doc.content,
       editedBy: updateDto.editorId,
-    });
+    } as CreationAttributes<DocumentHistory>);
 
     if (updateDto.title) doc.title = updateDto.title;
     if (updateDto.content) doc.content = updateDto.content;
