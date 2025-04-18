@@ -1,14 +1,17 @@
-import { Table, Column, Model, DataType, BeforeCreate, BeforeUpdate, } from 'sequelize-typescript'
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BeforeCreate,
+  BeforeUpdate,
+} from 'sequelize-typescript';
 import * as bcrypt from 'bcrypt';
 
 @Table({
   tableName: 'users',
   timestamps: true,
-  // defaultScope: {
-  //   attributes: { exclude: ['password']}
-  // }
 })
-
 export class User extends Model<User> {
   @Column({
     type: DataType.UUID,
@@ -18,47 +21,52 @@ export class User extends Model<User> {
   declare id: string;
 
   @Column({ type: DataType.STRING, unique: true })
-  declare email: string
+  declare email: string;
 
   @Column({ type: DataType.STRING })
-  declare username: string
+  declare username: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
   declare password: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare provider: 'local' | 'google' | 'github'
+  declare provider: 'local' | 'google' | 'github';
 
   @Column({ allowNull: true })
-  declare providerId: string
+  declare providerId: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare googleId: string
+  declare googleId: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare githubId: string
+  declare githubId: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare name: string
+  declare name: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
-  declare avatar: string
+  declare avatar: string;
 
   @Column({ type: DataType.TEXT, allowNull: true })
-  declare refreshToken: string
+  declare refreshToken: string;
 
   @BeforeCreate
   @BeforeUpdate
   static async hashPassword(user: User) {
-    if (user.password) {
+    if (user.changed('password')) {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(user.password, salt);
     }
   }
 
   async validatePassword(plainPassword: string): Promise<boolean> {
-    return bcrypt.compare(plainPassword, this.password)
+    return bcrypt.compare(plainPassword, this.password);
+  }
+
+  toJSON() {
+    const values = { ...this.get() } as any;
+    delete values.password;
+    delete values.refreshToken; 
+    return values;
   }
 }
-
-
