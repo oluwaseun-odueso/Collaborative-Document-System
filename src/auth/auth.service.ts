@@ -1,9 +1,12 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { User } from 'src/users/user.model';
+import { SetPasswordDto } from 'src/users/dto/set-password.dto';
+import * as bcrypt from 'bcrypt';
+
 
 @Injectable()
 export class AuthService {
@@ -86,5 +89,22 @@ export class AuthService {
     if (!user || user.refreshToken !== refreshToken) throw new ForbiddenException();
 
     return this.login(user)
+  }
+
+  async setPassword(dto: SetPasswordDto) {
+    const user = await this.userService.findByEmail(dto.email)
+    if (!user) throw new NotFoundException('User not found')
+
+    if (user.provider === 'local') {
+      throw new BadRequestException('User already has a local password')
+    }
+
+    user.password = dto.password;
+    user.provider = 'local';
+    await user.save();
+
+    return {
+      message: "Password set successfully. You can now log in with email and password."
+    }
   }
 }
