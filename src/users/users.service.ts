@@ -41,7 +41,9 @@ export class UserService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ where: { email } });
+    return this.userModel.findOne({ 
+      where: { email },
+    });
   }
 
   async findById(id: string): Promise<User | null> {
@@ -68,11 +70,12 @@ export class UserService {
     const user = new User();
     user.email = profile.email;
     user.username = profile.username || profile.email?.split('@')[0];
+    user.name = profile.username
     user.provider = profile.provider;
     if (profile.provider === 'google') user.googleId = profile.providerId;
     if (profile.provider === 'github') user.githubId = profile.providerId;
-    user.name = profile.displayName || profile.name;
-    user.avatar = profile.photos?.[0]?.value || null;
+    user.name = profile.displayName || profile.username;
+    user.avatar = profile.avatar;
     return user.save();
   }
 
