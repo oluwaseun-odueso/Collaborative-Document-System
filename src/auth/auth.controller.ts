@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { SetPasswordDto } from 'src/users/dto/set-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -36,5 +37,11 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   async githubRedirect(@Req() req) {
     return this.authService.validateOAuthLogin(req.user);
+  }
+
+  @Post('set-password')
+  @UseGuards(AuthGuard('jwt'))
+  async setPassword(@Req() req, @Body() dto: SetPasswordDto) {
+    return this.authService.setPassword(dto)
   }
 }
