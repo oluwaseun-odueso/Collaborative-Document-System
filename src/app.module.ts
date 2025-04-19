@@ -4,8 +4,9 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import databaseConfig, {
   databaseValidationSchema,
 } from './database/database.config';
-import { DatabaseModule } from "./database/database.module";
-import { AuthModule } from "./auth/auth.module";
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './auth/auth.module';
+import { DocumentsModule } from './documents/documents.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { AuthModule } from "./auth/auth.module";
       }),
     }),
     DatabaseModule,
-    AuthModule
+    AuthModule,
+    DocumentsModule
   ],
 })
 export class AppModule {}
