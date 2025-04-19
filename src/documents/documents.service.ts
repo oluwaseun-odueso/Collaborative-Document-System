@@ -40,11 +40,17 @@ export class DocumentsService {
     const doc = await this.documentModel.findByPk(id);
     if (!doc) throw new NotFoundException('Document not found');
 
-    await this.historyModel.create({
+    // await this.historyModel.create({
+    //   documentId: doc.id,
+    //   oldContent: doc.content,
+    //   editedBy: updateDto.editorId,
+    // } as CreationAttributes<DocumentHistory>);
+
+    await createInstance(this.historyModel, {
       documentId: doc.id,
       oldContent: doc.content,
       editedBy: updateDto.editorId,
-    } as CreationAttributes<DocumentHistory>);
+    });    
 
     if (updateDto.title) doc.title = updateDto.title;
     if (updateDto.content) doc.content = updateDto.content;
