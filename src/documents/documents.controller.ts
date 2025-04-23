@@ -12,6 +12,8 @@ import {
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
+// import { GetDocumentDto } from "./dto/get-document.dto"
+import { ValidateIdPipe } from "./pipes/validate-object-id.pipe"
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -30,7 +32,7 @@ export class DocumentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ValidateIdPipe) id: string) {
     return this.documentsService.findOne(id);
   }
 
