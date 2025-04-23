@@ -8,7 +8,4 @@ export class UpdateDocumentDto {
   @IsOptional()
   @IsString()
   content?: string;
-
-  @IsString()
-  editorId: string
 }
