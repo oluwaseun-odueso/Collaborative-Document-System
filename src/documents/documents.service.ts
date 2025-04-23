@@ -18,8 +18,11 @@ export class DocumentsService {
     createDto: CreateDocumentDto,
     ownerId: string,
   ): Promise<Document> {
-    return this.documentModel.create(createDto as CreationAttributes<Document> & { ownerId: string });
-  }
+    return this.documentModel.create({
+      ...createDto,
+      ownerId,
+    } as CreationAttributes<Document>);
+  }  
 
   async findAll(): Promise<Document[]> {
     return this.documentModel.findAll({
