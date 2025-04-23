@@ -13,7 +13,7 @@ import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 // import { GetDocumentDto } from "./dto/get-document.dto"
-import { ValidateIdPipe } from "./pipes/validate-object-id.pipe"
+import { ValidateIdPipe } from './pipes/validate-object-id.pipe';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -42,7 +42,8 @@ export class DocumentsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.documentsService.remove(id);
+  async remove(@Param('id', ValidateIdPipe) id: string) {
+    await this.documentsService.remove(id);
+    return { message: 'Document deleted successfully' };
   }
 }
