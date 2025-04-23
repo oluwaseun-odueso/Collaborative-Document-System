@@ -5,7 +5,7 @@ import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { DocumentHistory } from './models/document-history.model';
 import { CreationAttributes } from 'sequelize';
-import { createInstance } from "../common/helpers/sequelize.helpers"
+import { createInstance } from '../common/helpers/sequelize.helpers';
 
 @Injectable()
 export class DocumentsService {
@@ -22,7 +22,7 @@ export class DocumentsService {
       ...createDto,
       ownerId,
     } as CreationAttributes<Document>);
-  }  
+  }
 
   async findAll(): Promise<Document[]> {
     return this.documentModel.findAll({
@@ -39,21 +39,19 @@ export class DocumentsService {
     return doc;
   }
 
-  async update(id: string, updateDto: UpdateDocumentDto): Promise<Document> {
+  async update(
+    id: string,
+    updateDto: UpdateDocumentDto,
+    editorId: string,
+  ): Promise<Document> {
     const doc = await this.documentModel.findByPk(id);
     if (!doc) throw new NotFoundException('Document not found');
-
-    // await this.historyModel.create({
-    //   documentId: doc.id,
-    //   oldContent: doc.content,
-    //   editedBy: updateDto.editorId,
-    // } as CreationAttributes<DocumentHistory>);
 
     await createInstance(this.historyModel, {
       documentId: doc.id,
       oldContent: doc.content,
-      editedBy: updateDto.editorId,
-    });    
+      editedBy: editorId,
+    });
 
     if (updateDto.title) doc.title = updateDto.title;
     if (updateDto.content) doc.content = updateDto.content;
@@ -64,7 +62,7 @@ export class DocumentsService {
 
   async remove(id: string): Promise<void> {
     const doc = await this.documentModel.findByPk(id);
-    if(!doc) throw new NotFoundException('Document not found')
+    if (!doc) throw new NotFoundException('Document not found');
     await doc.destroy();
   }
 }
