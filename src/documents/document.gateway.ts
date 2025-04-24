@@ -53,4 +53,18 @@ export class DocumentGateway
     console.log(`Client ${client.id} left room: ${data.documentId}`);
   }
 
+  @SubscribeMessage('documentUpdate')
+  handleDocumentUpdate(
+    @MessageBody() data: { documentId: string; content: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // Broadcast the updated content to everyone else in the room
+    client.to(data.documentId).emit('documentUpdated', {
+      documentId: data.documentId,
+      content: data.content,
+    });
+
+    console.log(`Document ${data.documentId} updated by ${client.id}`);
+  }
+
 }
