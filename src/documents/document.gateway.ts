@@ -43,4 +43,14 @@ export class DocumentGateway
     console.log(`Client ${client.id} joined room: ${data.documentId}`);
   }
 
+  @SubscribeMessage('leaveRoom')
+  handleLeaveRoom(
+    @MessageBody() data: { documentId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.leave(data.documentId);
+    client.emit('leftRoom', { documentId: data.documentId });
+    console.log(`Client ${client.id} left room: ${data.documentId}`);
+  }
+
 }
