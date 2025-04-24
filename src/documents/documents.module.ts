@@ -5,13 +5,19 @@ import { DocumentsController } from './documents.controller';
 import { Document } from './models/document.model';
 import { DocumentHistory } from './models/document-history.model';
 import { DocumentComment } from './models/document-comment.model';
-// import { DocumentGateway } from './documents.gateway';
 import { User } from '../users/user.model';
+import { DocumentGateway } from './document.gateway';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Document, DocumentHistory, DocumentComment, User])],
-  // providers: [DocumentsService, DocumentGateway],
-  providers: [DocumentsService],
+  imports: [
+    SequelizeModule.forFeature([
+      Document,
+      DocumentHistory,
+      DocumentComment,
+      User,
+    ]),
+  ],
+  providers: [DocumentsService, DocumentGateway],
   controllers: [DocumentsController],
 })
 export class DocumentsModule {}
