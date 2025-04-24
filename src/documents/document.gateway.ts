@@ -67,4 +67,24 @@ export class DocumentGateway
     console.log(`Document ${data.documentId} updated by ${client.id}`);
   }
 
+  @SubscribeMessage('autoSave')
+  async handleAutoSave(
+    @MessageBody()
+    data: { documentId: string; content: string; userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // Save the updated document content and add to history
+    try {
+      await this.documentsService.autoSaveDocument(
+        data.documentId,
+        data.content,
+        data.userId,
+      );
+
+      client.emit('autoSaveSuccess', { documentId: data.documentId });
+    } catch (err) {
+      console.error('Auto-save failed:', err);
+      client.emit('autoSaveError', { message: 'Auto-save failed' });
+    }
+  }
 }
