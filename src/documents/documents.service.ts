@@ -65,4 +65,24 @@ export class DocumentsService {
     if (!doc) throw new NotFoundException('Document not found');
     await doc.destroy();
   }
+
+  async autoSaveDocument(
+    documentId: string,
+    content: string,
+    editorId: string,
+  ): Promise<void> {
+    const doc = await this.documentModel.findByPk(documentId);
+    if (!doc) throw new NotFoundException('Document not found');
+
+    if (doc.content === content) return;
+
+    await createInstance(this.historyModel, {
+      documentId,
+      oldContent: doc.content,
+      editedBy: editorId,
+    });
+
+    doc.content = content;
+    await doc.save();
+  }
 }
