@@ -33,4 +33,14 @@ export class DocumentGateway
     console.log(`Client disconnected: ${client.id}`);
   }
 
+  @SubscribeMessage('joinRoom')
+  handleJoinRoom(
+    @MessageBody() data: { documentId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(data.documentId);
+    client.emit('joinedRoom', { documentId: data.documentId });
+    console.log(`Client ${client.id} joined room: ${data.documentId}`);
+  }
+
 }
