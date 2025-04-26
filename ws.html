@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testing the socket</title>
+</head>
+
+<body>
+
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+    integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
+    crossorigin="anonymous"></script>
+  <script>
+    const socket = io("http://localhost:3000");
+    const dto = { "documentId": "test-document-id" }
+    socket.on("connect", data => {
+      console.log("connected to the backend server")
+
+      // tell the server you want to join a room
+      socket.emit("joinRoom", dto)
+
+      // listen out for when the server tells me i've joined a room
+      socket.on("joinedRoom", data => {
+        console.log("LFG!!! i've joined a room", data)
+
+        // wait for 10 seconds
+        setTimeout(() => socket.emit("leaveRoom", dto), 10000)
+      })
+    })
+  </script>
+</body>
+
+</html>

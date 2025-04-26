@@ -34,21 +34,21 @@ export class DocumentGateway
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(
+  async handleJoinRoom(
     @MessageBody() data: { documentId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(data.documentId);
+    await client.join(data.documentId);
     client.emit('joinedRoom', { documentId: data.documentId });
     console.log(`Client ${client.id} joined room: ${data.documentId}`);
   }
 
   @SubscribeMessage('leaveRoom')
-  handleLeaveRoom(
+  async handleLeaveRoom(
     @MessageBody() data: { documentId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.leave(data.documentId);
+    await client.leave(data.documentId);
     client.emit('leftRoom', { documentId: data.documentId });
     console.log(`Client ${client.id} left room: ${data.documentId}`);
   }
