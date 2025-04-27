@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO Tester</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>Socket.IO Client</h1>
+    <script>
+      const socket = io('http://localhost:3000');
+
+      socket.on('connect', () => {
+        console.log("Coneected to the backend server")
+        console.log('Connected:', socket.id);
+
+        // Join Room
+        socket.emit('joinRoom', {
+          documentId: '2796a498-1201-4fe6-a2cf-e6e918dbb2b5', // Replace with your actual ID
+        });
+
+        // Update document content after 3 sec
+        setTimeout(() => {
+          socket.emit('documentUpdate', {
+            documentId: '2796a498-1201-4fe6-a2cf-e6e918dbb2b5',
+            content: 'Updated content from browser',
+          });
+        }, 3000);
+
+        // Leave room after 6 sec
+        setTimeout(() => {
+          socket.emit('leaveRoom', {
+            documentId: '2796a498-1201-4fe6-a2cf-e6e918dbb2b5',
+          });
+        }, 6000);
+      });
+
+      // Listen for updates
+      socket.on('documentUpdated', (data) => {
+        console.log('Document updated by someone:', data);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected');
+      });
+    </script>
+  </body>
+</html>

@@ -38,6 +38,7 @@ export class DocumentGateway
     @MessageBody() data: { documentId: string },
     @ConnectedSocket() client: Socket,
   ) {
+    console.log("Handler got here")
     client.join(data.documentId);
     client.emit('joinedRoom', { documentId: data.documentId });
     console.log(`Client ${client.id} joined room: ${data.documentId}`);
@@ -58,7 +59,6 @@ export class DocumentGateway
     @MessageBody() data: { documentId: string; content: string },
     @ConnectedSocket() client: Socket,
   ) {
-    // Broadcast the updated content to everyone else in the room
     client.to(data.documentId).emit('documentUpdated', {
       documentId: data.documentId,
       content: data.content,
@@ -73,7 +73,6 @@ export class DocumentGateway
     data: { documentId: string; content: string; userId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    // Save the updated document content and add to history
     try {
       await this.documentsService.autoSaveDocument(
         data.documentId,
