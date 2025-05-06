@@ -72,6 +72,11 @@ export class DocumentsService {
     editorId: string,
   ): Promise<void> {
     const doc = await this.documentModel.findByPk(documentId);
+
+    console.log("Auto-save working")
+    console.log("Content: ", content)
+    console.log("Editor ID: ", editorId)
+    
     if (!doc) throw new NotFoundException('Document not found');
 
     if (doc.content === content) return;
