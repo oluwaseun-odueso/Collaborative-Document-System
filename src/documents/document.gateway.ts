@@ -7,11 +7,14 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
+import { UseGuards } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { DocumentsService } from './documents.service';
 import { Injectable } from '@nestjs/common';
+import { WsAuthGuard } from '../auth/ws-auth.guard'; 
 
 @Injectable()
+@UseGuards(WsAuthGuard)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -26,7 +29,8 @@ export class DocumentGateway
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    const user = client.data.user;
+    console.log(`Client connected: ${client.id}, User ID: ${user?.id}`);
   }
 
   handleDisconnect(client: Socket) {
@@ -54,16 +58,24 @@ export class DocumentGateway
   }
 
   @SubscribeMessage('documentUpdate')
-  handleDocumentUpdate(
-    @MessageBody() data: { documentId: string; content: string },
+  async handleDocumentUpdate(
+    @MessageBody() data: { documentId: string; content: string; userId: string },
     @ConnectedSocket() client: Socket,
   ) {
+    await this.documentsService.autoSaveDocument(
+      data.documentId,
+      data.content,
+      data.userId,
+    );
+
+    console.log(`Document ${data.documentId} updated and saved by ${client.id}`);
+
     client.to(data.documentId).emit('documentUpdated', {
       documentId: data.documentId,
       content: data.content,
     });
 
-    console.log(`Document ${data.documentId} updated by ${client.id}`);
+    client.emit('updateSuccess', { documentId: data.documentId });
   }
 
   @SubscribeMessage('autoSave')
